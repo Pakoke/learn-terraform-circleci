@@ -1,6 +1,6 @@
 terraform {
   required_version = "> 0.14"
-  
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -10,7 +10,7 @@ terraform {
 
   backend "s3" {
     bucket = "circle-ci-backend-20210614201950619500000001"
-    key = "terraform/webapp/terraform.tfstate"
+    key    = "terraform/webapp/terraform.tfstate"
     region = "eu-west-2"
   }
 }
