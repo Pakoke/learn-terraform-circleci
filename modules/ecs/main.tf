@@ -1,55 +1,13 @@
-##TODO
-##Change the role AmazonEC2ContainerServiceforEC2Role to another one with this policy assigned
-# {
-#     "Version": "2012-10-17",
-#     "Statement": [
-#         {
-#             "Sid": "",
-#             "Effect": "Allow",
-#             "Action": [
-#                 "ssmmessages:OpenDataChannel",
-#                 "ssmmessages:OpenControlChannel",
-#                 "ssmmessages:CreateDataChannel",
-#                 "ssmmessages:CreateControlChannel",
-#                 "ssm:UpdateInstanceInformation"
-#             ],
-#             "Resource": "*"
-#         },
-#         {
-#             "Sid": "",
-#             "Effect": "Allow",
-#             "Action": "s3:GetEncryptionConfiguration",
-#             "Resource": "*"
-#         },
-#         {
-#             "Sid": "",
-#             "Effect": "Allow",
-#             "Action": [
-#                 "logs:PutLogEvents",
-#                 "logs:CreateLogStream",
-#                 "ecs:UpdateContainerInstancesState",
-#                 "ecs:Submit*",
-#                 "ecs:StartTelemetrySession",
-#                 "ecs:RegisterContainerInstance",
-#                 "ecs:Poll",
-#                 "ecs:DiscoverPollEndpoint",
-#                 "ecs:DeregisterContainerInstance",
-#                 "ecs:CreateCluster",
-#                 "ecr:GetDownloadUrlForLayer",
-#                 "ecr:GetAuthorizationToken",
-#                 "ecr:BatchGetImage",
-#                 "ecr:BatchCheckLayerAvailability",
-#                 "ec2:DescribeTags"
-#             ],
-#             "Resource": "*"
-#         }
-#     ]
-# }
+
+
+data "aws_ssm_parameter" "ami_ecs_latest" {
+  name = "/aws/service/ecs/optimized-ami/amazon-linux-2/recommended/image_id"
+}
 
 data "aws_ami" "ecs_optimized" {
   filter {
-    name   = "name"
-    values = ["*-amazon-ecs-optimized"]
+    name   = "image-id"
+    values = [aws_ssm_parameter.ami_ecs_latest]
   }
   most_recent = true
   owners      = ["amazon"]
