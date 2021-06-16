@@ -7,7 +7,7 @@ data "aws_ssm_parameter" "ami_ecs_latest" {
 data "aws_ami" "ecs_optimized" {
   filter {
     name   = "image-id"
-    values = [aws_ssm_parameter.ami_ecs_latest]
+    values = [data.aws_ssm_parameter.ami_ecs_latest.value]
   }
   most_recent = true
   owners      = ["amazon"]
@@ -112,7 +112,6 @@ resource "aws_ecs_cluster" "cluster" {
 resource "aws_autoscaling_group" "cluster" {
   name                = var.ecs_cluster_name
   vpc_zone_identifier = var.vpc_private_subnets
-  # launch_configuration = "${aws_launch_configuration.cluster.name}"
 
   launch_template {
     id      = aws_launch_template.cluster.id
@@ -122,7 +121,8 @@ resource "aws_autoscaling_group" "cluster" {
   desired_capacity = 2
   min_size         = 2
   max_size         = 3
-
+  #TODO
+  #Enable functionality from outside of the module
   # instance_refresh {
   #   strategy = "Rolling"
   #   preferences {
@@ -151,7 +151,6 @@ resource "aws_launch_template" "cluster" {
     name = aws_iam_instance_profile.ecs_agent.name
   }
 
-  # iam_instance_profile = "${aws_iam_instance_profile.ecs_agent.name}"
   user_data     = base64encode(templatefile(join("", [abspath(path.module), "/user_data.yml"]), { cluster_name = var.ecs_cluster_name }))
   instance_type = "t3a.micro"
 
@@ -168,7 +167,8 @@ resource "aws_launch_template" "cluster" {
       volume_type = "gp3"
     }
   }
-
+  #TODO
+  # Request and buy spot instances
   # instance_market_options {
   #   market_type = "spot"
   # }
@@ -181,11 +181,3 @@ resource "aws_launch_template" "cluster" {
   # }
 
 }
-
-# resource "aws_launch_configuration" "cluster" {
-#   name                 = "${var.ecs_cluster_name}"
-#   image_id             = "${data.aws_ami.ecs_optimized.id}"
-#   iam_instance_profile = "${aws_iam_instance_profile.ecs_agent.name}"
-#   user_data            = templatefile(join("",[abspath(path.module),"/user_data.yml"]),{cluster_name = var.ecs_cluster_name})
-#   instance_type        = "t2.micro"
-# }
