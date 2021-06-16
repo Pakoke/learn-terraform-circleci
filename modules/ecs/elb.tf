@@ -73,7 +73,7 @@ resource "aws_lb" "front_end" {
   security_groups    = [aws_security_group.elb.id]
   subnets            = var.vpc_public_subnets
 
-  enable_deletion_protection = true
+  enable_deletion_protection = false
 
 #   access_logs {
 #     bucket  = aws_s3_bucket.lb_logs.bucket

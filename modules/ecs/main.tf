@@ -1,3 +1,51 @@
+##TODO
+##Change the role AmazonEC2ContainerServiceforEC2Role to another one with this policy assigned
+# {
+#     "Version": "2012-10-17",
+#     "Statement": [
+#         {
+#             "Sid": "",
+#             "Effect": "Allow",
+#             "Action": [
+#                 "ssmmessages:OpenDataChannel",
+#                 "ssmmessages:OpenControlChannel",
+#                 "ssmmessages:CreateDataChannel",
+#                 "ssmmessages:CreateControlChannel",
+#                 "ssm:UpdateInstanceInformation"
+#             ],
+#             "Resource": "*"
+#         },
+#         {
+#             "Sid": "",
+#             "Effect": "Allow",
+#             "Action": "s3:GetEncryptionConfiguration",
+#             "Resource": "*"
+#         },
+#         {
+#             "Sid": "",
+#             "Effect": "Allow",
+#             "Action": [
+#                 "logs:PutLogEvents",
+#                 "logs:CreateLogStream",
+#                 "ecs:UpdateContainerInstancesState",
+#                 "ecs:Submit*",
+#                 "ecs:StartTelemetrySession",
+#                 "ecs:RegisterContainerInstance",
+#                 "ecs:Poll",
+#                 "ecs:DiscoverPollEndpoint",
+#                 "ecs:DeregisterContainerInstance",
+#                 "ecs:CreateCluster",
+#                 "ecr:GetDownloadUrlForLayer",
+#                 "ecr:GetAuthorizationToken",
+#                 "ecr:BatchGetImage",
+#                 "ecr:BatchCheckLayerAvailability",
+#                 "ec2:DescribeTags"
+#             ],
+#             "Resource": "*"
+#         }
+#     ]
+# }
+
 data "aws_ami" "ecs_optimized" {
   filter {
     name   = "name"
@@ -5,12 +53,6 @@ data "aws_ami" "ecs_optimized" {
   }
   most_recent = true
   owners      = ["amazon"]
-}
-
-# Define the role.
-resource "aws_iam_role" "ecs_agent" {
-  name               = "ecs-agent"
-  assume_role_policy = data.aws_iam_policy_document.ecs_agent.json
 }
 
 # Allow EC2 service to assume this role.
@@ -25,10 +67,79 @@ data "aws_iam_policy_document" "ecs_agent" {
   }
 }
 
+# Define the role.
+resource "aws_iam_role" "ecs_agent" {
+  name               = "ecs-agent"
+  assume_role_policy = data.aws_iam_policy_document.ecs_agent.json
+}
+
+# Allow EC2 service to assume this role.
+data "aws_iam_policy_document" "ecs_agent_permissions" {
+  statement {
+    sid = ""
+    effect = "Allow"
+    actions = [
+      "ssmmessages:OpenDataChannel",
+      "ssmmessages:OpenControlChannel",
+      "ssmmessages:CreateDataChannel",
+      "ssmmessages:CreateControlChannel",
+      "ssm:UpdateInstanceInformation"
+    ]
+
+    resources = [
+      "*",
+    ]
+  }
+
+  statement {
+    sid = ""
+    effect = "Allow"
+    actions = [
+      "s3:GetEncryptionConfiguration"
+    ]
+
+    resources = [
+      "*",
+    ]
+  }
+
+  statement {
+    sid = ""
+    effect = "Allow"
+    actions = [
+      "logs:PutLogEvents",
+      "logs:CreateLogStream",
+      "ecs:UpdateContainerInstancesState",
+      "ecs:Submit*",
+      "ecs:StartTelemetrySession",
+      "ecs:RegisterContainerInstance",
+      "ecs:Poll",
+      "ecs:DiscoverPollEndpoint",
+      "ecs:DeregisterContainerInstance",
+      "ecs:CreateCluster",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:GetAuthorizationToken",
+      "ecr:BatchGetImage",
+      "ecr:BatchCheckLayerAvailability",
+      "ec2:DescribeTags"
+    ]
+
+    resources = [
+      "*",
+    ]
+  }
+}
+
+resource "aws_iam_policy" "ecs_agent_policy" {
+  name   = "ecs_agent_permissions"
+  path   = "/"
+  policy = data.aws_iam_policy_document.ecs_agent_permissions.json
+}
+
 # Give this role the permission to do ECS Agent things.
 resource "aws_iam_role_policy_attachment" "ecs_agent" {
   role       = aws_iam_role.ecs_agent.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+  policy_arn = aws_iam_policy.ecs_agent_policy.arn
 }
 
 resource "aws_iam_instance_profile" "ecs_agent" {
@@ -120,30 +231,3 @@ resource "aws_launch_template" "cluster" {
 #   user_data            = templatefile(join("",[abspath(path.module),"/user_data.yml"]),{cluster_name = var.ecs_cluster_name})
 #   instance_type        = "t2.micro"
 # }
-
-resource "aws_ecs_task_definition" "jenkins" {
-  family                = "jenkins"
-  container_definitions = <<TASK_DEFINITION
-[
-    {
-        "cpu": 10,
-        "command": ["sleep", "10"],
-        "entryPoint": ["/"],
-        "environment": [
-            {"name": "VARNAME", "value": "VARVAL"}
-        ],
-        "essential": true,
-        "image": "jenkins",
-        "memory": 128,
-        "name": "jenkins",
-        "portMappings": [
-            {
-                "containerPort": 80,
-                "hostPort": 8080
-            }
-        ]
-    }
-]
-TASK_DEFINITION
-
-}
