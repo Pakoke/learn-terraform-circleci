@@ -118,6 +118,8 @@ resource "aws_autoscaling_group" "cluster" {
     version = aws_launch_template.cluster.latest_version
   }
 
+  target_group_arns = [aws_lb_target_group.tg_ecs.arn]
+
   desired_capacity = 2
   min_size         = 2
   max_size         = 3
@@ -136,12 +138,22 @@ resource "aws_autoscaling_group" "cluster" {
     value               = "Value"
     propagate_at_launch = true
   }
+
+  lifecycle {
+    ignore_changes = [
+      target_group_arns
+    ]
+  }
 }
 
-resource "aws_autoscaling_attachment" "asg_attachment_ecs" {
-  autoscaling_group_name = aws_autoscaling_group.cluster.id
-  alb_target_group_arn   = aws_lb_target_group.tg_80.arn
-}
+# resource "aws_autoscaling_attachment" "asg_attachment_ecs" {
+#   autoscaling_group_name = aws_autoscaling_group.cluster.id
+#   alb_target_group_arn   = aws_lb_target_group.tg_ecs.arn
+# #   elb = aws_lb.front_end.id
+#   lifecycle {
+    
+#   }
+# }
 
 resource "aws_launch_template" "cluster" {
   name     = var.ecs_cluster_name

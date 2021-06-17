@@ -1,6 +1,6 @@
-resource "aws_lb_target_group" "tg_80" {
-  name     = "odilo-app-80-tg"
-  #port     = 80
+resource "aws_lb_target_group" "tg_ecs" {
+  name     = "ecs-tg"
+  port     = 80
   protocol = "HTTP"
   vpc_id   = var.vpc_id
 }
@@ -26,7 +26,7 @@ resource "aws_lb_listener" "front_end" {
 
     default_action {
         type             = "forward"
-        target_group_arn = aws_lb_target_group.tg_80.arn
+        target_group_arn = aws_lb_target_group.tg_ecs.arn
     }
 }
 
