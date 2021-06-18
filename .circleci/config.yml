@@ -1,17 +1,60 @@
-version: 2
+version: 2.1
+
+parameters:
+  image-tag:
+    type: string
+    default: "latest"
+  workingdir:
+    type: string
+    default: "."
+  aws-accountid:
+    type: string
+    default: ""
+  aws-access-key:
+    type: string
+    default: $AWS_ACCESS_KEY_ID
+  aws-secret-key:
+    type: string
+    default: $AWS_SECRET_ACCESS_KEY
+  aws-region:
+    type: string
+    default: "eu-west-2"
+orbs:
+  orb-tools: circleci/orb-tools@10.0
+  aws-ecr: circleci/aws-ecr@7.0.0
 
 jobs:
+  # aws-ecr/build-and-push-image:
+  #   account-url: AWS_ECR_ACCOUNT_URL_ENV_VAR_NAME
+  #   aws-access-key-id: ACCESS_KEY_ID_ENV_VAR_NAME
+  #   aws-secret-access-key: SECRET_ACCESS_KEY_ENV_VAR_NAME
+  #   context: myContext
+  #   create-repo: true
+  #   dockerfile: myDockerfile
+  #   no-output-timeout: 20m
+  #   path: pathToMyDockerfile
+  #   profile-name: myProfileName
+  #   region: AWS_REGION_ENV_VAR_NAME
+  #   repo: myECRRepository
+  #   skip-when-tags-exist: false
+  #   tag: 'latest,myECRRepoTag'
+
+
   plan-apply:
     working_directory: /tmp/project
     docker:
       - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
+    environment:
+      IMAGETAG: "<< pipeline.parameters.image-tag >>"
+      AWS_ACCESS_KEY_ID: "<< pipeline.parameters.aws-access-key >>"
+      AWS_SECRET_ACCESS_KEY: "<< pipeline.parameters.aws-secret-key >>"
     steps:
       - checkout
       - run:
           name: terraform init & plan
           command: |
             terraform init -input=false
-            terraform plan -out tfapply -var-file variables.tfvars
+            terraform plan -out tfapply -var-file variables.tfvars -var="region=<< pipeline.parameters.aws-region >>"
       - persist_to_workspace:
           root: .
           paths:
@@ -41,7 +84,7 @@ jobs:
       - run:
           name: terraform create destroy plan
           command: |
-            terraform plan -destroy -out tfdestroy -var-file variables.tfvars
+            terraform plan -destroy -out tfdestroy -var-file variables.tfvars -var="region=<< pipeline.parameters.aws-region >>"
       - persist_to_workspace:
           root: .
           paths:

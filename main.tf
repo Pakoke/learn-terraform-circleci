@@ -12,6 +12,4 @@ module "ecs_cluster" {
   vpc_id              = module.vpc.vpc_id
 }
 
-output "Endpoint" {
-  value = module.ecs_cluster.elb_default_dns
-}
+
