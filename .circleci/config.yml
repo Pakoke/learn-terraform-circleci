@@ -46,6 +46,8 @@ jobs:
       - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
     environment:
       IMAGETAG: "<< pipeline.parameters.image-tag >>"
+      AWS_ACCESS_KEY_ID: << pipeline.parameters.aws-access-key >>
+      AWS_SECRET_ACCESS_KEY: << pipeline.parameters.aws-secret-key >>
     steps:
       - checkout
       - run:
