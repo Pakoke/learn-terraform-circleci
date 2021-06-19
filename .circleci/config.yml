@@ -58,7 +58,7 @@ jobs:
   
   build-push-image:
     docker:
-      - image: cimg/base
+      - image: cimg/base:stable
     steps:
       - attach_workspace:
           at: .
