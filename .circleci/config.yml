@@ -118,7 +118,7 @@ workflows:
               - apply
       - plan-destroy:
           requires:
-            - apply
+            - build-push-image
       - hold-destroy:
           type: approval
           requires:
