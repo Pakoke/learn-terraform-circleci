@@ -24,22 +24,6 @@ orbs:
   aws-ecr: circleci/aws-ecr@7.0.0
 
 jobs:
-  # aws-ecr/build-and-push-image:
-  #   account-url: AWS_ECR_ACCOUNT_URL_ENV_VAR_NAME
-  #   aws-access-key-id: ACCESS_KEY_ID_ENV_VAR_NAME
-  #   aws-secret-access-key: SECRET_ACCESS_KEY_ENV_VAR_NAME
-  #   context: myContext
-  #   create-repo: true
-  #   dockerfile: myDockerfile
-  #   no-output-timeout: 20m
-  #   path: pathToMyDockerfile
-  #   profile-name: myProfileName
-  #   region: AWS_REGION_ENV_VAR_NAME
-  #   repo: myECRRepository
-  #   skip-when-tags-exist: false
-  #   tag: 'latest,myECRRepoTag'
-
-
   plan-apply:
     working_directory: /tmp/project
     docker:
@@ -72,6 +56,19 @@ jobs:
           root: .
           paths:
             - .
+
+  aws-ecr/build-and-push-image:
+    account-url: 174301567049.dkr.ecr.eu-west-2.amazonaws.com
+    aws-access-key-id: $AWS_ACCESS_KEY_ID
+    aws-secret-access-key: $AWS_SECRET_ACCESS_KEY
+    create-repo: true
+    dockerfile: Dockerfile
+    no-output-timeout: 20m
+    path: ./apps/dotnetapi/src
+    region: << pipeline.parameters.aws-region >>
+    repo: dotnetapi
+    skip-when-tags-exist: false
+    tag: 'latest'
 
   plan-destroy:
     docker:
@@ -111,6 +108,7 @@ workflows:
       - apply:
           requires:
             - hold-apply
+      - aws-ecr/build-and-push-image
       - plan-destroy:
           requires:
             - apply
