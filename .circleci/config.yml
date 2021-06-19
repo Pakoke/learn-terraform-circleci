@@ -113,7 +113,9 @@ workflows:
       - apply:
           requires:
             - hold-apply
-      - build-push-image
+      - build-push-image:
+          requires:
+              - apply
       - plan-destroy:
           requires:
             - apply
