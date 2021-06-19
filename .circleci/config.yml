@@ -104,7 +104,7 @@ jobs:
             terraform apply -auto-approve tfdestroy
 
 workflows:
-  version: 2
+  version: 2.1
   plan_approve_apply:
     jobs:
       - plan-apply
@@ -115,7 +115,7 @@ workflows:
       - apply:
           requires:
             - hold-apply
-      - aws-ecr/build-and-push-image
+      - build-push-image
       - plan-destroy:
           requires:
             - apply
