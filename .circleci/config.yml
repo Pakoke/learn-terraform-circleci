@@ -19,6 +19,7 @@ parameters:
   aws-region:
     type: string
     default: "eu-west-2"
+
 orbs:
   orb-tools: circleci/orb-tools@10.0
   aws-ecr: circleci/aws-ecr@7.0.0
@@ -56,19 +57,25 @@ jobs:
           root: .
           paths:
             - .
-
-  aws-ecr/build-and-push-image:
-    account-url: 174301567049.dkr.ecr.eu-west-2.amazonaws.com
-    aws-access-key-id: $AWS_ACCESS_KEY_ID
-    aws-secret-access-key: $AWS_SECRET_ACCESS_KEY
-    create-repo: true
-    dockerfile: Dockerfile
-    no-output-timeout: 20m
-    path: ./apps/dotnetapi/src
-    region: << pipeline.parameters.aws-region >>
-    repo: dotnetapi
-    skip-when-tags-exist: false
-    tag: 'latest'
+  
+  build-push-image:
+    docker:
+      - image: cimg/base
+    steps:
+      - attach_workspace:
+          at: .
+      - aws-ecr/build-and-push-image:
+          account-url: << pipeline.parameters.aws-accountid >>.dkr.ecr.<< pipeline.parameters.aws-region >>.amazonaws.com
+          aws-access-key-id: $AWS_ACCESS_KEY_ID
+          aws-secret-access-key: $AWS_SECRET_ACCESS_KEY
+          create-repo: true
+          dockerfile: Dockerfile
+          no-output-timeout: 20m
+          path: ./apps/dotnetapi/src
+          region: << pipeline.parameters.aws-region >>
+          repo: dotnetapi
+          skip-when-tags-exist: false
+          tag: 'latest'
 
   plan-destroy:
     docker:
