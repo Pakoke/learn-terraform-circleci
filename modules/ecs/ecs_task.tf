@@ -29,6 +29,10 @@ data "aws_iam_policy_document" "ecs_service_document_additionalpermissions" {
       "elasticloadbalancing:RegisterTargets",
       "ec2:Describe*",
       "ec2:AuthorizeSecurityGroupIngress",
+      "ecr:Get*",
+      "ecr:Describe*",
+      "ecr:List*",
+      "ecr:Batch*"
     ]
     resources = [
       "*",
