@@ -1,17 +1,5 @@
-resource "aws_lb_target_group" "tg_ecs" {
-  name     = "ecs-tg"
-  port     = 80
-  protocol = "HTTP"
-  vpc_id   = var.vpc_id
-
-  health_check {
-    enabled = true
-    path    = "/health"
-  }
-}
-
 resource "aws_lb" "front_end" {
-  name               = "odilo-front-end"
+  name               = var.elb_name
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.elb.id]
@@ -23,19 +11,6 @@ resource "aws_lb" "front_end" {
     Environment = "production"
   }
 }
-
-resource "aws_lb_listener" "front_end" {
-    load_balancer_arn = aws_lb.front_end.arn
-    port              = "80"
-    protocol          = "HTTP"
-
-    default_action {
-        type             = "forward"
-        target_group_arn = aws_lb_target_group.tg_ecs.arn
-    }
-}
-
-
 
 resource "aws_lb_listener_rule" "health_check" {
   listener_arn = aws_lb_listener.front_end.arn
