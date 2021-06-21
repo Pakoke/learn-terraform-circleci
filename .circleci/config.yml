@@ -35,6 +35,7 @@ jobs:
       - run:
           name: terraform init & plan
           command: |
+            cd infrastructure/
             terraform init -input=false
             terraform plan -out tfapply -var-file variables.tfvars -var="region=${DEFAULT_AWS_REGION}"
       - persist_to_workspace:
@@ -51,6 +52,7 @@ jobs:
       - run:
           name: terraform
           command: |
+            cd infrastructure/
             terraform apply -auto-approve tfapply
       - persist_to_workspace:
           root: .
@@ -163,6 +165,7 @@ jobs:
       - run:
           name: terraform create destroy plan
           command: |
+            cd infrastructure/
             terraform plan -destroy -out tfdestroy -var-file variables.tfvars -var="region=${DEFAULT_AWS_REGION}"
       - persist_to_workspace:
           root: .
@@ -178,6 +181,7 @@ jobs:
       - run:
           name: terraform destroy
           command: |
+            cd infrastructure/
             terraform apply -auto-approve tfdestroy
   
 
