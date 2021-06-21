@@ -11,18 +11,6 @@ resource "aws_lb_target_group" "tg_ecs_1" {
   }
 }
 
-resource "aws_lb_listener" "front_end" {
-    load_balancer_arn = data.aws_lb.front_end.arn
-    port              = "80"
-    protocol          = "HTTP"
-
-    default_action {
-        type             = "forward"
-        target_group_arn = aws_lb_target_group.tg_ecs_1.arn
-    }
-}
-
-
 resource "aws_ecs_service" "odilo-dotnetapi" {
   name            = "odilo-dotnetapi"
   cluster         = data.aws_ecs_cluster.ecs_cluster.id

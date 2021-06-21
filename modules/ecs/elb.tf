@@ -12,6 +12,24 @@ resource "aws_lb" "front_end" {
   }
 }
 
+resource "aws_lb_listener" "front_end" {
+    load_balancer_arn = aws_lb.front_end.arn
+    port              = "80"
+    protocol          = "HTTP"
+
+  default_action {
+    type = "fixed-response"
+
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "HEALTHY"
+      status_code  = "200"
+    }
+    order = 5000
+  }
+}
+
+
 resource "aws_lb_listener_rule" "health_check" {
   listener_arn = aws_lb_listener.front_end.arn
 
