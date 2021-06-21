@@ -1,30 +1,11 @@
-# resource "aws_ecs_task_definition" "dotnetapi_task" {
-#   family                = "odilo-dotnetapi"
-#   container_definitions = <<TASK_DEFINITION
-# [
-#     {
-#         "essential": true,
-#         "image": "nginx:latest",
-#         "memory": 256,
-#         "name": "odilo-ngnix",
-#         "portMappings": [
-#             {
-#                 "containerPort": 80,
-#                 "hostPort": 0
-#             }
-#         ]
-#     }
-# ]
-# TASK_DEFINITION
-#     cpu = 256
-#     memory = 256
-#     execution_role_arn = data.aws_iam_role.ecs_service_role.arn
-# }
-
 resource "aws_ecs_task_definition" "dotnetapi_task" {
-  family                = "odilo-dotnetapi"
-  container_definitions = jsonencode(templatefile(join("", [abspath(path.module), "/../dotnetapi/src/ecs-app-definition.json"])))
+  family                = "odilo-dotnetapi-task"
+  #container_definitions = jsonencode(templatefile(join("", [abspath(path.root), "/../dotnetapi/src/ecs-app-definition.json"]),{ cluster_name = var.ecs_cluster_name }))
+  container_definitions = templatefile(join("", [abspath(path.root), "/../dotnetapi/src/ecs-app-definition.json"]), { ecr_repository = aws_ecr_repository.dotnetapi.repository_url })
   cpu = 256
   memory = 256
   execution_role_arn = data.aws_iam_role.ecs_service_role.arn
+  task_role_arn = data.aws_iam_role.ecs_service_role.arn
+  requires_compatibilities = ["EXTERNAL","EC2"]
+
 }

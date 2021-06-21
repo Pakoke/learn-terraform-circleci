@@ -22,3 +22,8 @@ variable "elb_name" {
   type = string
   description = "Unique name for the ELB used on the ECS cluster"
 }
+
+variable "vpc_name" {
+  type = string
+  description = "VPC Name"
+}
