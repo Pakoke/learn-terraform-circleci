@@ -13,6 +13,7 @@ RUN dotnet publish -c Release -o out
 # Generate runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:5.0
 WORKDIR /app
+HEALTHCHECK --interval=15s --timeout=4s CMD curl -f http://localhost/health || exit 1
 EXPOSE 80
 COPY --from=build-env /app/out .
 ENTRYPOINT ["dotnet", "dotnetapi.dll"]
