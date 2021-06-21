@@ -61,10 +61,12 @@ jobs:
     docker:
       - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
     steps:
+      - attach_workspace:
+          at: .
       - run:
           name: terraform init & plan
           command: |
-            cd /tmp/project/apps/terraform
+            cd apps/terraform/
             terraform init -input=false
             terraform plan -out tfapply-apps -var-file variables.tfvars -var="region=${DEFAULT_AWS_REGION}"
       - persist_to_workspace:
