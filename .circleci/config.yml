@@ -57,6 +57,37 @@ jobs:
           paths:
             - .
   
+  plan-apply-apps:
+    docker:
+      - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
+    steps:
+      - run:
+          name: terraform init & plan
+          command: |
+            cd /apps/terraform
+            terraform init -input=false
+            terraform plan -out tfapply-apps -var-file variables.tfvars -var="region=${DEFAULT_AWS_REGION}"
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .            
+  
+  apply-apps:
+    docker:
+      - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: terraform
+          command: |
+            cd /apps/terraform
+            terraform apply -auto-approve tfapply-apps
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
   build-push-image:
     machine:
       image: ubuntu-2004:202010-01
@@ -75,22 +106,53 @@ jobs:
           repo: dotnetapi
           skip-when-tags-exist: false
           tag: 'latest,${CIRCLE_SHA1}'
-  update-ecr-service:
+
+  # update-ecr-service:
+  #   docker:
+  #     - image: 'cimg/python:3.9.1'
+  #   steps:
+  #     - aws-cli/setup:
+  #         aws-access-key-id: AWS_ACCESS_KEY_ID
+  #         aws-region: AWS_DEFAULT_REGION
+  #         aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+  #     - aws-ecs/update-task-definition-from-json:
+  #         task-definition-json: ./apps/dotnetapi/src/ecs-app-definition.json
+  #     - aws-ecs/deploy-service-update:
+  #         cluster-name: 'odilo-cluster'
+  #         container-image-name-updates: 'container=dotnetapi-service,tag=${CIRCLE_SHA1}'
+  #         family: 'dotnetapi-service'
+
+  plan-destroy-apps:
     docker:
-      - image: 'cimg/python:3.9.1'
+      - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
     steps:
-      - aws-cli/setup:
-          aws-access-key-id: AWS_ACCESS_KEY_ID
-          aws-region: AWS_DEFAULT_REGION
-          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
-      - aws-ecs/update-task-definition-from-json:
-          task-definition-json: ./apps/dotnetapi/src/ecs-app-definition.json
-      - aws-ecs/deploy-service-update:
-          cluster-name: 'odilo-cluster'
-          container-image-name-updates: 'container=dotnetapi-service,tag=${CIRCLE_SHA1}'
-          family: 'dotnetapi-service'
-          requires:
-            - aws-ecr/build-and-push-image
+      - attach_workspace:
+          at: .
+      - run:
+          name: terraform create destroy plan
+          command: |
+            cd /apps/terraform
+            terraform plan -destroy -out tfdestroy-apps -var-file variables.tfvars -var="region=${DEFAULT_AWS_REGION}"
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+  destroy-apps:
+    docker:
+      - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: terraform destroy
+          command: |
+            cd /apps/terraform
+            terraform apply -auto-approve tfdestroy-apps
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
 
   plan-destroy:
     docker:
@@ -117,6 +179,7 @@ jobs:
           name: terraform destroy
           command: |
             terraform apply -auto-approve tfdestroy
+  
 
 workflows:
   version: 2.1
@@ -130,12 +193,28 @@ workflows:
       - apply:
           requires:
             - hold-apply
+      - plan-apply-apps:
+          requires:
+            - apply
+      - apply-apps:
+          requires:
+            - plan-apply-apps
       - build-push-image:
           requires:
-              - apply
-      - plan-destroy:
+            - apply-apps
+      - plan-destroy-apps:
           requires:
             - build-push-image
+      - hold-destroy-apps:
+          type: approval
+          requires:
+            - plan-destroy-apps
+      - destroy-apps:
+          requires:
+            - hold-destroy-apps
+      - plan-destroy:
+          requires:
+            - destroy-apps
       - hold-destroy:
           type: approval
           requires:
