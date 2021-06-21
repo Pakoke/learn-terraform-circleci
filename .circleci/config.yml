@@ -64,7 +64,7 @@ jobs:
       - run:
           name: terraform init & plan
           command: |
-            cd apps/terraform/
+            cd /tmp/project/apps/terraform
             terraform init -input=false
             terraform plan -out tfapply-apps -var-file variables.tfvars -var="region=${DEFAULT_AWS_REGION}"
       - persist_to_workspace:
