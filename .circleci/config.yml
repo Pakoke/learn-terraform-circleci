@@ -23,6 +23,7 @@ parameters:
 orbs:
   orb-tools: circleci/orb-tools@10.0
   aws-ecr: circleci/aws-ecr@7.0.0
+  aws-ecs: circleci/aws-ecs@2.2.1
 
 jobs:
   plan-apply:
@@ -73,7 +74,23 @@ jobs:
           region: DEFAULT_AWS_REGION
           repo: dotnetapi
           skip-when-tags-exist: false
-          tag: 'latest'
+          tag: 'latest,${CIRCLE_SHA1}'
+  update-ecr-service:
+    docker:
+      - image: 'cimg/python:3.9.1'
+    steps:
+      - aws-cli/setup:
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-region: AWS_DEFAULT_REGION
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+      - aws-ecs/update-task-definition-from-json:
+          task-definition-json: ./apps/dotnetapi/src/ecs-app-definition.json
+      - aws-ecs/deploy-service-update:
+          cluster-name: 'odilo-cluster'
+          container-image-name-updates: 'container=dotnetapi-service,tag=${CIRCLE_SHA1}'
+          family: 'dotnetapi-service'
+          requires:
+            - aws-ecr/build-and-push-image
 
   plan-destroy:
     docker:

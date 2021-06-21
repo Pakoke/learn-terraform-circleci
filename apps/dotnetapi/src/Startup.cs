@@ -28,6 +28,8 @@ namespace dotnetapi
         {
 
             services.AddControllers();
+            services.AddHealthChecks()
+                .AddCheck<ExampleHealthCheck>("example_health_check");
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "dotnetapi", Version = "v1" });
@@ -55,6 +57,7 @@ namespace dotnetapi
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHealthChecks("/health");
             });
         }
     }
