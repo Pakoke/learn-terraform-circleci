@@ -198,12 +198,12 @@ workflows:
       - apply:
           requires:
             - hold-apply
-      - build-push-image:
+      - build-push-image-deploy:
           requires:
             - apply
       - plan-apply-apps:
           requires:
-            - build-push-image
+            - build-push-image-deploy
       - hold-apply-apps:
           type: approval
           requires:
