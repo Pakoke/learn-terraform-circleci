@@ -62,4 +62,7 @@ resource "aws_ecs_service" "odilo-dotnetapi" {
     type       = "memberOf"
     expression = "attribute:ecs.availability-zone in [${var.region}a, ${var.region}b, ${var.region}c]"
   }
+
+  health_check_grace_period_seconds = 60
+
 }
