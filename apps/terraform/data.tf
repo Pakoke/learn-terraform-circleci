@@ -22,3 +22,7 @@ data "aws_lb_listener" "default80" {
 data "aws_ecs_cluster" "ecs_cluster" {
   cluster_name = var.ecs_cluster_name
 }
+
+data "aws_ecr_repository" "dotnetapi_repo" {
+  name = "dotnetapi"
+}
