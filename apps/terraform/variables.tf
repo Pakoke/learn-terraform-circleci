@@ -18,3 +18,8 @@ variable "vpc_name" {
   type = string
   description = "VPC Name"
 }
+
+variable "blue_green" {
+  type = string
+  description = "This variable is going to be used to prepare our Terraform plan in case we are in a blue or a green case"
+}

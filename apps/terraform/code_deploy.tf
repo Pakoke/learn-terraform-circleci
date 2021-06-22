@@ -1,3 +1,47 @@
+module "s3_bucket" {
+  source = "terraform-aws-modules/s3-bucket/aws"
+
+  bucket = "codedeploy-appspec-2021odilo"
+  acl    = "private"
+
+  versioning = {
+    enabled = false
+  }
+
+  lifecycle_rule = [
+    {
+      id      = "principal"
+      enabled = true
+
+      transition = [
+        {
+          days          = 30
+          storage_class = "ONEZONE_IA"
+          }, {
+          days          = 60
+          storage_class = "GLACIER"
+        }
+      ]
+
+      expiration = {
+        days = 90
+      }
+
+      noncurrent_version_expiration = {
+        days = 30
+      }
+    }
+  ]
+}
+
+resource "aws_s3_bucket_object" "dotnetapi_appspec" {
+  bucket = module.s3_bucket.s3_bucket_id
+  key    = "dotnetapi-app/appspec.json"
+  content_base64 = base64encode(templatefile(join("", [abspath(path.root), "/appspec.json"]), { dotnet_task_definition = aws_ecs_task_definition.dotnetapi_task.arn }))
+
+  etag = md5("./appspec.json")
+}
+
 resource "aws_iam_role" "codedeploy_role" {
   name = "ecs-codedeploy-role"
 
@@ -67,11 +111,11 @@ resource "aws_codedeploy_deployment_group" "dotnetapi_deploymentgroup" {
       }
 
       target_group {
-        name = aws_lb_target_group.tg_ecs_1.name
+        name = aws_lb_target_group.tg_ecs_blue.name
       }
 
       target_group {
-        name = aws_lb_target_group.tg_ecs_2.name
+        name = aws_lb_target_group.tg_ecs_green.name
       }
     }
   }

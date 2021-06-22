@@ -2,3 +2,4 @@
 ecs_cluster_name = "ecs-odilo"
 elb_name         = "odilo-front-end"
 vpc_name         = "ecs-vpc"
+blue_green       = "green"

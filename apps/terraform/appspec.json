@@ -1,0 +1,17 @@
+{
+	"version": 0.0,
+	"Resources": [
+		{
+			"TargetService": {
+				"Type": "AWS::ECS::Service",
+				"Properties": {
+    			"TaskDefinition": "${dotnet_task_definition}",
+    			"LoadBalancerInfo": {
+    				"ContainerName": "dotnetapi",
+    				"ContainerPort": 80
+    			}
+  			}				
+			}
+		}
+	]
+}

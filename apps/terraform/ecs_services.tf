@@ -1,6 +1,6 @@
 
-resource "aws_lb_target_group" "tg_ecs_1" {
-  name     = "ecs-tg-1"
+resource "aws_lb_target_group" "tg_ecs_blue" {
+  name     = "ecs-tg-blue"
   port     = 80
   protocol = "HTTP"
   vpc_id   = data.aws_vpc.selected.id
@@ -11,8 +11,8 @@ resource "aws_lb_target_group" "tg_ecs_1" {
   }
 }
 
-resource "aws_lb_target_group" "tg_ecs_2" {
-  name     = "ecs-tg-2"
+resource "aws_lb_target_group" "tg_ecs_green" {
+  name     = "ecs-tg-green"
   port     = 80
   protocol = "HTTP"
   vpc_id   = data.aws_vpc.selected.id
@@ -30,7 +30,7 @@ resource "aws_lb_listener_rule" "dotnetapi_rule" {
 
   action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.tg_ecs_1.arn
+    target_group_arn = (var.blue_green == "blue") ? aws_lb_target_group.tg_ecs_blue.arn : aws_lb_target_group.tg_ecs_green.arn
   }
   condition {
     path_pattern {
@@ -45,15 +45,20 @@ resource "aws_ecs_service" "odilo_dotnetapi" {
   task_definition = aws_ecs_task_definition.dotnetapi_task.arn
   desired_count   = 2
   iam_role        = data.aws_iam_role.ecs_service_role.arn
-  depends_on      = [aws_lb_target_group.tg_ecs_1,aws_lb_target_group.tg_ecs_2,aws_ecs_task_definition.dotnetapi_task]
-
+  depends_on      = [aws_lb_target_group.tg_ecs_blue,aws_lb_target_group.tg_ecs_green,aws_ecs_task_definition.dotnetapi_task]
+  
+  lifecycle {
+    ignore_changes = [
+      task_definition,
+    ]
+  }
 #   ordered_placement_strategy {
 #     type  = "binpack"
 #     field = "cpu"
 #   }
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.tg_ecs_1.arn
+    target_group_arn = (var.blue_green == "blue") ? aws_lb_target_group.tg_ecs_blue.arn : aws_lb_target_group.tg_ecs_green.arn
     container_name   = "dotnetapi"
     container_port   = 80
   }
