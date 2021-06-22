@@ -18,8 +18,3 @@ variable "vpc_name" {
   type = string
   description = "VPC Name"
 }
-
-variable "ecr_repository_url"{
-  type = string
-  description = "This is the entire url repository"
-}
