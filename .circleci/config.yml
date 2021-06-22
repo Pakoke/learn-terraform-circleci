@@ -23,7 +23,6 @@ parameters:
 orbs:
   orb-tools: circleci/orb-tools@10.0
   aws-ecr: circleci/aws-ecr@7.0.0
-  aws-ecs: circleci/aws-ecs@2.2.1
   aws-code-deploy: circleci/aws-code-deploy@2.0.0
 
 jobs:
@@ -117,13 +116,12 @@ jobs:
           command: |
             echo 'export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)' >> $BASH_ENV
             source $BASH_ENV
-      - aws-code-deploy/deploy:
-          application-name: dotnetapi-app
-          # arguments: '--profile assume_role'
-          bundle-bucket: codedeploy-appspec-2021odilo
-          bundle-key: dotnetapi-app/appspec.json
-          deployment-group: dotnetapi-deploymentgroup
-          service-role-arn: "arn:aws:iam::${AWS_ACCOUNT_ID}:role/ecs-codedeploy-role"
+      # - aws-code-deploy/deploy:
+      #     application-name: dotnetapi-app
+      #     bundle-bucket: codedeploy-appspec-2021odilo
+      #     bundle-key: dotnetapi-app/appspec.json
+      #     deployment-group: dotnetapi-deploymentgroup
+      #     service-role-arn: "arn:aws:iam::${AWS_ACCOUNT_ID}:role/ecs-codedeploy-role"
 
   plan-destroy-apps:
     docker:
