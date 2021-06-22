@@ -63,6 +63,10 @@ resource "aws_ecs_service" "odilo_dotnetapi" {
     expression = "attribute:ecs.availability-zone in [${var.region}a, ${var.region}b, ${var.region}c]"
   }
 
+  deployment_controller {
+    type = "CODE_DEPLOY"
+  }
+
   health_check_grace_period_seconds = 60
 
 }
