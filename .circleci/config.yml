@@ -74,7 +74,8 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
-            - .            
+            - .
+            
   
   apply-apps:
     docker:
@@ -205,9 +206,13 @@ workflows:
       - plan-apply-apps:
           requires:
             - build-push-image
-      - apply-apps:
+      - hold-apply-apps:
+          type: approval
           requires:
             - plan-apply-apps
+      - apply-apps:
+          requires:
+            - hold-apply-apps
       - plan-destroy-apps:
           requires:
             - apply-apps
