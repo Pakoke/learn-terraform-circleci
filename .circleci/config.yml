@@ -102,7 +102,7 @@ jobs:
           account-url: DEFAULT_ECR_ACCOUNT_URL
           aws-access-key-id: AWS_ACCESS_KEY_ID
           aws-secret-access-key: AWS_SECRET_ACCESS_KEY
-          create-repo: false
+          create-repo: true
           dockerfile: Dockerfile
           no-output-timeout: 20m
           path: ./apps/dotnetapi/src
@@ -199,18 +199,18 @@ workflows:
       - apply:
           requires:
             - hold-apply
-      - plan-apply-apps:
+      - build-push-image:
           requires:
             - apply
+      - plan-apply-apps:
+          requires:
+            - build-push-image
       - apply-apps:
           requires:
             - plan-apply-apps
-      - build-push-image:
-          requires:
-            - apply-apps
       - plan-destroy-apps:
           requires:
-            - build-push-image
+            - apply-apps
       - hold-destroy-apps:
           type: approval
           requires:

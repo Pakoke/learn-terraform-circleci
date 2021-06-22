@@ -39,7 +39,7 @@ resource "aws_lb_listener_rule" "dotnetapi_rule" {
   }
 }
 
-resource "aws_ecs_service" "odilo-dotnetapi" {
+resource "aws_ecs_service" "odilo_dotnetapi" {
   name            = "odilo-dotnetapi-service"
   cluster         = data.aws_ecs_cluster.ecs_cluster.id
   task_definition = aws_ecs_task_definition.dotnetapi_task.arn
