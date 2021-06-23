@@ -205,10 +205,13 @@ workflows:
       - build-push-image:
           requires:
             - apply
+      - plan-apply-apps:
+          requires:
+            - build-push-image
       - hold-apply-apps:
           type: approval
           requires:
-            - build-push-image
+            - plan-apply-apps
       - apply-apps:
           requires:
             - hold-apply-apps
