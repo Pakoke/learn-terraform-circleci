@@ -131,6 +131,7 @@ jobs:
           bundle-type: json
           deploy-bundle-arguments: --region ${DEFAULT_AWS_REGION}
           get-deployment-group-arguments: --region ${DEFAULT_AWS_REGION}
+          deployment-config: CodeDeployDefault.ECSAllAtOnce
 
   plan-destroy-apps:
     docker:
