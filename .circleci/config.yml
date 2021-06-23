@@ -58,7 +58,26 @@ jobs:
           root: .
           paths:
             - .
-  
+
+  build-push-image:
+    machine:
+      image: ubuntu-2004:202010-01
+    steps:
+      - attach_workspace:
+          at: .
+      - aws-ecr/build-and-push-image:
+          account-url: DEFAULT_ECR_ACCOUNT_URL
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+          create-repo: true
+          dockerfile: Dockerfile
+          no-output-timeout: 10m
+          path: ./apps/dotnetapi/src
+          region: DEFAULT_AWS_REGION
+          repo: dotnetapi
+          skip-when-tags-exist: false
+          tag: 'latest,${CIRCLE_SHA1}'
+
   plan-apply-apps:
     docker:
       - image: docker.mirror.hashicorp.services/hashicorp/terraform:light
@@ -93,35 +112,22 @@ jobs:
           paths:
             - .
 
-  build-push-image-deploy:
+  blue-green-deployment:
     machine:
       image: ubuntu-2004:202010-01
     steps:
       - attach_workspace:
           at: .
-      - aws-ecr/build-and-push-image:
-          account-url: DEFAULT_ECR_ACCOUNT_URL
-          aws-access-key-id: AWS_ACCESS_KEY_ID
-          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
-          create-repo: true
-          dockerfile: Dockerfile
-          no-output-timeout: 20m
-          path: ./apps/dotnetapi/src
-          region: DEFAULT_AWS_REGION
-          repo: dotnetapi
-          skip-when-tags-exist: false
-          tag: 'latest,${CIRCLE_SHA1}'
-      - run:
-          name: Update PATH and Define Environment Variable at Runtime
-          command: |
-            echo 'export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)' >> $BASH_ENV
-            source $BASH_ENV
-      # - aws-code-deploy/deploy:
-      #     application-name: dotnetapi-app
-      #     bundle-bucket: codedeploy-appspec-2021odilo
-      #     bundle-key: dotnetapi-app/appspec.json
-      #     deployment-group: dotnetapi-deploymentgroup
-      #     service-role-arn: "arn:aws:iam::${AWS_ACCOUNT_ID}:role/ecs-codedeploy-role"
+      # - run:
+      #     name: Update PATH and Define Environment Variable at Runtime
+      #     command: |
+      #       echo 'export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)' >> $BASH_ENV
+      #       source $BASH_ENV    
+      - aws-code-deploy/deploy-bundle:
+          application-name: dotnetapi-app
+          bundle-bucket: codedeploy-appspec-2021odilo
+          bundle-key: dotnetapi-app/appspec.json
+          deployment-group: dotnetapi-deploymentgroup
 
   plan-destroy-apps:
     docker:
@@ -196,22 +202,22 @@ workflows:
       - apply:
           requires:
             - hold-apply
-      - build-push-image-deploy:
+      - build-push-image:
           requires:
             - apply
-      - plan-apply-apps:
-          requires:
-            - build-push-image-deploy
       - hold-apply-apps:
           type: approval
           requires:
-            - plan-apply-apps
+            - build-push-image
       - apply-apps:
           requires:
             - hold-apply-apps
-      - plan-destroy-apps:
+      - blue-green-deployment:
           requires:
             - apply-apps
+      - plan-destroy-apps:
+          requires:
+            - blue-green-deployment
       - hold-destroy-apps:
           type: approval
           requires:
