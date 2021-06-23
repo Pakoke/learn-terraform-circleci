@@ -89,7 +89,7 @@ jobs:
           command: |
             cd apps/terraform/
             terraform init -input=false
-            terraform plan -out tfapply-apps -var-file variables.tfvars -var="region=${DEFAULT_AWS_REGION}" -var="blue_green=blue"
+            terraform plan -out tfapply-apps -var-file variables.tfvars -var="region=${DEFAULT_AWS_REGION}" -var="blue_green=green"
       - persist_to_workspace:
           root: .
           paths:
