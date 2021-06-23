@@ -118,16 +118,19 @@ jobs:
     steps:
       - attach_workspace:
           at: .
-      # - run:
-      #     name: Update PATH and Define Environment Variable at Runtime
-      #     command: |
-      #       echo 'export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)' >> $BASH_ENV
-      #       source $BASH_ENV    
+      - run:
+          name: Update PATH and Define Environment Variable at Runtime
+          command: |
+            echo 'export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query 'Account' --output text)' >> $BASH_ENV
+            source $BASH_ENV    
       - aws-code-deploy/deploy-bundle:
           application-name: dotnetapi-app
           bundle-bucket: codedeploy-appspec-2021odilo
           bundle-key: dotnetapi-app/appspec.json
           deployment-group: dotnetapi-deploymentgroup
+          bundle-type: json
+          deploy-bundle-arguments: --region ${DEFAULT_AWS_REGION}
+          get-deployment-group-arguments: --region ${DEFAULT_AWS_REGION}
 
   plan-destroy-apps:
     docker:
