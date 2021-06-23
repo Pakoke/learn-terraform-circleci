@@ -19,6 +19,9 @@ parameters:
   aws-region:
     type: string
     default: "eu-west-2"
+  aws-deploy-status:
+    type: string
+    default: "blue"    
 
 orbs:
   orb-tools: circleci/orb-tools@10.0
@@ -89,7 +92,7 @@ jobs:
           command: |
             cd apps/terraform/
             terraform init -input=false
-            terraform plan -out tfapply-apps -var-file variables.tfvars -var="region=${DEFAULT_AWS_REGION}" -var="blue_green=green"
+            terraform plan -out tfapply-apps -var-file variables.tfvars -var="region=${DEFAULT_AWS_REGION}" -var="blue_green=<<pipeline.parameters.aws-deploy-status>>"
       - persist_to_workspace:
           root: .
           paths:
