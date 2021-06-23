@@ -126,7 +126,7 @@ jobs:
       - aws-code-deploy/deploy-bundle:
           application-name: dotnetapi-app
           bundle-bucket: codedeploy-appspec-2021odilo
-          bundle-key: dotnetapi-app/appspec.json
+          bundle-key: dotnetapi-app/appspec
           deployment-group: dotnetapi-deploymentgroup
           bundle-type: json
           deploy-bundle-arguments: --region ${DEFAULT_AWS_REGION}
