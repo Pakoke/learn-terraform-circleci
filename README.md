@@ -91,7 +91,7 @@ Here's a blank template to get started:
 <!-- GETTING STARTED -->
 ## Getting Started
 
-This project and all the resources will help you to build and deploy the infrastructure.
+This project and all the resources will help you to build and deploy the infrastructure. The component deployed are going to be the enough ones to have a fully ECS cluster using EC2 instances using an Autoscaling group.
 
 ### Prerequisites
 
@@ -165,7 +165,7 @@ This is what you need to initialize to set your pipeline on CircleCI.
 6. Open your CircleCI account and import the ``config.yml`` from the folder ``.circleci``. This file is our pipeline on CircleCI, the one that it is going to be on charge of creating all of our resources.
 7. As soon as you finish to import the CircleCI pipeline, go to ``Project Settings`` and go to the section ``Environment Variables``. On this section, we need to configure the ones that we have on the image below. The value that we need to put are the ones obtained on the step 5
 
-<a href="https://github.com/Pakoke/learn-terraform-circleci">
+<a>
     <img src="images/circleci_project_settings.png" alt="project_settings" width="800" height="400">
 </a>
 
@@ -176,11 +176,67 @@ This is what you need to initialize to set your pipeline on CircleCI.
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+At this point, you will have your pipeline set up and running without any issue. To see that it is working and you have your entire infrastructure, we need to understand each set of steps to really see that we have everything created.
+On our pipeline we are going to have four sections
+1. Apply section: This section will consist on apply the main infrastructure which it is going to consist in a ECS cluster, a VPC and an Application Load Balancer. You can test this part going to the terraform step and get the output there. You will see an URL which it is going to return a ``HEALTHY`` message.
+Note: CircleCI ofuscate environment variables that's why we see the string ``.*********.``. In this case, that string correspond to the region itself.
 
-_For more examples, please refer to the [Documentation](https://example.com)_
+<a>
+    <img src="images/aws_loadbalancer_endpoint.png" alt="aws_loadbalancer_endpoint" width="800" height="500">
+</a>
+<a>
+    <img src="images/aws_loadbalancer.png" alt="aws_loadbalancer" width="800" height="500">
+</a>
 
+2. Build and Push image section: This section will handle the creation of our docker image. To do this, we will use an Orb provided by CircleCI to help us build a docker image. This docker image is located inside of our ``apps/dotnetapi/src`` folder. This image is going to update automatically to ECR, our repository of images which later on will be used by our cluster to deploy the app.
 
+<a>
+    <img src="images/buildandpushimage.png" alt="buildandpushimage" width="800" height="500">
+</a>
+
+3. Apply Apps section: This part of our deployment will handle the installation of our Target Group and task and services for our ECS Cluster. This will built all the components to connect our app to the load balancer. In addition to that, it will build a CodeDeploy deploy configuration which it is going to managed our BlueGreen deployment for our Apps. In this section, we need to take into account one variable which we will use every time that we push some code. This variable will let Terraform know what of the Target Group of our Balancer is the active.
+``
+  aws-deploy-status:
+    type: string
+    default: "blue"
+``
+This variable can be change on our circleci pipeline configuration so everytime that we are going to do a change on our application we need to change this variable to let Terraform knows on what status it is.
+
+4. Blue Green Deployment section: This step is going execute our Blue Green deployment using CodeDeploy. CodeDeploy is another service of AWS which itis a fully managed deployment service that automates software deployments to a variety of compute services such as Amazon EC2, AWS Fargate, AWS Lambda, and your on-premises servers.
+
+<a>
+    <img src="images/codedeploybluegreen.png" alt="codedeploybluegreen" width="800" height="500">
+</a>
+
+As soon as it finish, we will see something like the image below. The process is simple, using the two target group and the deployment configuration CodeDeploy itself is going to switch the traffic between those not after deploy our new service into our ECS cluster. After that we will end up having as primary the other Target Group and the other one as a secondary Target Group.
+
+<a>
+    <img src="images/codedeploybluegreen_finish.png" alt="codedeploybluegreen_finish" width="800" height="500">
+</a>
+
+To test that we are deployment the latest version, we only need to do the next changes.
+First, we need to wait until we finish to deploy everything. To know when it finish, we are only going to check the url and the swagger page. If you see the swagger page, we are good to proceed. Then, we need to do the next changes to our code and our pipeline.
+
+On our config.yml, change this variable
+```
+  aws-deploy-status:
+    type: string
+    default: "blue" -> "green"
+```
+
+On our Dotnet api application, change the next line on the file ``WeatherForecastController.cs`` to the next above.
+```
+        private static readonly string[] Summaries = new[]
+        {
+            // Comment the next line and uncomment the next one below            
+            // This will help to see how the blue green deployment install the latest code on our ecs cluster
+            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+            // "Nevado","Caluroso","Nublado","Tormentoso"
+        };
+```
+
+As soon as you do those two changes, push into our pipeline and approved the steps. When the step blue-green-deployment finish, you will see the changes on our API.
+You check specifically the changes, you only need to go to the url ``http://odilo-front-end-892215146.eu-west-2.elb.amazonaws.com/WeatherForecast``
 
 <!-- ROADMAP -->
 ## Roadmap
