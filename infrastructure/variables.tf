@@ -27,3 +27,7 @@ variable "vpc_name" {
   type = string
   description = "VPC Name"
 }
+
+variable "s3_terraform_backend" {
+  type = string
+}

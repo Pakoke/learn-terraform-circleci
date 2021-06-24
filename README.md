@@ -109,6 +109,7 @@ This is what you need to initialize to set your pipeline on CircleCI.
     ``` 
 
 * AWS Account
+* CircleCI Account
 * AWS Client
 
     Windows
@@ -158,8 +159,13 @@ This is what you need to initialize to set your pipeline on CircleCI.
     account_id = "xxxxxxxxxx"
     aws_region = "xx-xxxx-2"
     s3_terraform_state = "circle-ci-backend-xxxxxxxxxxxx"
-
     ```
+6. Open your CircleCI account and import the ``config.yml`` from the folder ``.circleci``. This file is our pipeline on CircleCI, the one that it is going to be on charge of creating all of our resources.
+7. As soon as you finish to import the CircleCI pipeline, go to ``Project Settings`` and go to the section ``Environment Variables``. On this section, we need to configure the ones that we have on the image below. The value that we need to put are the ones obtained on the step 5
+
+<a href="https://github.com/Pakoke/learn-terraform-circleci">
+    <img src="images/circleci_project_settings.png" alt="project_settings" width="1000" height="500">
+</a>
 
 <!-- USAGE EXAMPLES -->
 ## Usage

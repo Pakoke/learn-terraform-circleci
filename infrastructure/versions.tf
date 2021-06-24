@@ -9,7 +9,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket = "circle-ci-backend-20210614201950619500000001"
+    bucket = var.s3_terraform_backend
     key    = "terraform/webapp/terraform.tfstate"
     region = "eu-west-2"
   }
