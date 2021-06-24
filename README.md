@@ -161,9 +161,6 @@ This is what you need to initialize to set your pipeline on CircleCI.
 
     ```
 
-
-
-
 <!-- USAGE EXAMPLES -->
 ## Usage
 
@@ -203,7 +200,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Your Name - [@twitter_handle](https://twitter.com/twitter_handle) - email
+Francisco Javier Ruiz - [@twitter_handle](https://twitter.com/twitter_handle) - email
 
 Project Link: [https://github.com/Pakoke/learn-terraform-circleci](https://github.com/Pakoke/learn-terraform-circleci)
 
