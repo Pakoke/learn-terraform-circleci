@@ -154,18 +154,24 @@ This is what you need to initialize to set your pipeline on CircleCI.
     terraform init
     terraform apply --auto-approve
     ```
-5. Get all the outputs that it shows Terraform at the end of plan.
+5. Get all the outputs that it shows Terraform at the end of plan. You should see something like this
     ```
-    account_id = "xxxxxxxxxx"
-    aws_region = "xx-xxxx-2"
-    s3_terraform_state = "circle-ci-backend-xxxxxxxxxxxx"
+    AWS_USER_NAME = "xxxx"
+    DEFAULT_ACCOUNT_ID = "xxxxxx"
+    DEFAULT_AWS_REGION = "xx-xxxx-x"
+    DEFAULT_ECR_ACCOUNT_URL = "xxxxx.dkr.ecr.xx-xxxx-x.amazonaws.com"
+    S3_TERRAFORM_STATE = "xxxxxxxxxxx"
     ```
 6. Open your CircleCI account and import the ``config.yml`` from the folder ``.circleci``. This file is our pipeline on CircleCI, the one that it is going to be on charge of creating all of our resources.
 7. As soon as you finish to import the CircleCI pipeline, go to ``Project Settings`` and go to the section ``Environment Variables``. On this section, we need to configure the ones that we have on the image below. The value that we need to put are the ones obtained on the step 5
 
 <a href="https://github.com/Pakoke/learn-terraform-circleci">
-    <img src="images/circleci_project_settings.png" alt="project_settings" width="1000" height="500">
+    <img src="images/circleci_project_settings.png" alt="project_settings" width="800" height="400">
 </a>
+
+8. As you can see, there are two variables that Terraform is not getting for us. Those two variables are sensitive information so in order to obtain those we need to go to AWS Management Console and go the IAM service. On that service we need to go to User and click on the name that Terraform show us on the step 5. After that, you just need generate a ``secret key`` and ``access key`` to finish configuring your CircleCI environments variables.
+
+9. Now there is only one step more to finish the set up of our pipeline. This set up is to configure our Terraform backend and save our state accross steps on our pipeline. To do this, we need to search the files ``version.tf`` and replace the string ``put your s3 bucket`` with the one obtained on the terraform output from the step 5. As soon as you finish to replace it, commit your changes and push it. This last action it will automatically push the first pipeline.
 
 <!-- USAGE EXAMPLES -->
 ## Usage
