@@ -169,9 +169,9 @@ This is what you need to initialize to set your pipeline on CircleCI.
     <img src="images/circleci_project_settings.png" alt="project_settings" width="800" height="400">
 </a>
 
-8. As you can see, there are two variables that Terraform is not getting for us. Those two variables are sensitive information so in order to obtain those we need to go to AWS Management Console and go the IAM service. On that service we need to go to User and click on the name that Terraform show us on the step 5. After that, you just need generate a ``secret key`` and ``access key`` to finish configuring your CircleCI environments variables.
+8. As you can see, there are two variables that Terraform is not getting for us. Those two variables are sensitive information so in order to obtain those we need to go to AWS Management Console and go the IAM service. On that service we need to go to User and click on the name that Terraform show us on the step 5 ``AWS_USER_NAME = "xxxx"``. After that, you just need generate a ``secret key`` and ``access key`` to finish configuring your CircleCI environments variables.
 
-9. Now there is only one step more to finish the set up of our pipeline. This set up is to configure our Terraform backend and save our state accross steps on our pipeline. To do this, we need to search the files ``version.tf`` and replace the string ``put your s3 bucket`` with the one obtained on the terraform output from the step 5. As soon as you finish to replace it, commit your changes and push it. This last action it will automatically push the first pipeline.
+9. Now there is only one step more to finish the set up of our pipeline. This set up is to configure our Terraform backend and save our state accross steps on our pipeline. To do this, we need to search the files ``version.tf`` and replace the string ``put your s3 bucket`` with the one obtained on the terraform output from the step 5 ``S3_TERRAFORM_STATE = "xxxxxxxxxxx"``. As soon as you finish to replace it, commit your changes and push it. This last action it will automatically push the first pipeline.
 
 <!-- USAGE EXAMPLES -->
 ## Usage
