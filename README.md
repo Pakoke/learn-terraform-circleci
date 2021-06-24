@@ -6,13 +6,8 @@
 *** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
 *** https://www.markdownguide.org/basic-syntax/#reference-style-links
 -->
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
-[![CircleCI](https://circleci.com/github/Pakoke/learn-terraform-circleci/tree/master.svg?style=svg)](https://circleci.com/github/Pakoke/learn-terraform-circleci/?branch=master)
+[![CircleCI](https://circleci.com/gh/Pakoke/learn-terraform-circleci.svg?style=svg)](https://circleci.com/gh/Pakoke/learn-terraform-circleci)
 
 
 <!-- PROJECT LOGO -->
@@ -154,7 +149,7 @@ This is what you need to initialize to set your pipeline on CircleCI.
     terraform init
     terraform apply --auto-approve
     ```
-5. Get all the outputs that it shows Terraform at the end of plan. You should see something like this
+5. Get all the outputs that it shows Terraform at the end of the apply. You should see something like this:
     ```
     AWS_USER_NAME = "xxxx"
     DEFAULT_ACCOUNT_ID = "xxxxxx"
@@ -176,10 +171,11 @@ This is what you need to initialize to set your pipeline on CircleCI.
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-At this point, you will have your pipeline set up and running without any issue. To see that it is working and you have your entire infrastructure, we need to understand each set of steps to really see that we have everything created.
+At this point, you will have your pipeline set up and running without any issue. To see that it is working and you have your entire infrastructure created, we need to understand each set of steps to really see that we have everything built in our AWS account.
+
 On our pipeline we are going to have four sections
-1. Apply section: This section will consist on apply the main infrastructure which it is going to consist in a ECS cluster, a VPC and an Application Load Balancer. You can test this part going to the terraform step and get the output there. You will see an URL which it is going to return a ``HEALTHY`` message.
-Note: CircleCI ofuscate environment variables that's why we see the string ``.*********.``. In this case, that string correspond to the region itself.
+1. Apply steps: This section will consist on building the main infrastructure which it is going to consist in a ECS cluster, a VPC and an Application Load Balancer. You can test this part going to the terraform step and get the output there. You will see an URL which it is going to return a ``HEALTHY`` message.
+**Note: CircleCI ofuscate environment variables that's why we see the string ``.*********.``. In this case, that string correspond to the region itself.**
 
 <a>
     <img src="images/aws_loadbalancer_endpoint.png" alt="aws_loadbalancer_endpoint" width="800" height="500">
@@ -188,13 +184,13 @@ Note: CircleCI ofuscate environment variables that's why we see the string ``.**
     <img src="images/aws_loadbalancer.png" alt="aws_loadbalancer" width="800" height="500">
 </a>
 
-2. Build and Push image section: This section will handle the creation of our docker image. To do this, we will use an Orb provided by CircleCI to help us build a docker image. This docker image is located inside of our ``apps/dotnetapi/src`` folder. This image is going to update automatically to ECR, our repository of images which later on will be used by our cluster to deploy the app.
+2. Build and Push image steps: This section will handle the creation of our docker image. To do this, we will use an Orb provided by CircleCI to help us build a docker image. This docker image is located inside of our ``apps/dotnetapi/src`` folder. This image is going to update automatically to ECR, our repository of images which later on will be used by our cluster to deploy the app.
 
 <a>
     <img src="images/buildandpushimage.png" alt="buildandpushimage" width="800" height="500">
 </a>
 
-3. Apply Apps section: This part of our deployment will handle the installation of our Target Group and task and services for our ECS Cluster. This will built all the components to connect our app to the load balancer. In addition to that, it will build a CodeDeploy deploy configuration which it is going to managed our BlueGreen deployment for our Apps. In this section, we need to take into account one variable which we will use every time that we push some code. This variable will let Terraform know what of the Target Group of our Balancer is the active.
+3. Apply Apps setps: This part of our deployment will handle the installation of our Target Group and task and services for our ECS Cluster. This will built all the components to connect our app to the load balancer. In addition to that, it will build a CodeDeploy deploy configuration which it is going to managed our BlueGreen deployment for our Apps. In this section, we need to take into account one variable which we will use every time that we push some code. This variable will let Terraform know what of the Target Group of our Balancer is the active.
 ``
   aws-deploy-status:
     type: string
@@ -202,7 +198,7 @@ Note: CircleCI ofuscate environment variables that's why we see the string ``.**
 ``
 This variable can be change on our circleci pipeline configuration so everytime that we are going to do a change on our application we need to change this variable to let Terraform knows on what status it is.
 
-4. Blue Green Deployment section: This step is going execute our Blue Green deployment using CodeDeploy. CodeDeploy is another service of AWS which itis a fully managed deployment service that automates software deployments to a variety of compute services such as Amazon EC2, AWS Fargate, AWS Lambda, and your on-premises servers.
+4. Blue Green Deployment steps: This step is going execute our Blue Green deployment using CodeDeploy. CodeDeploy is another service of AWS which itis a fully managed deployment service that automates software deployments to a variety of compute services such as Amazon EC2, AWS Fargate, AWS Lambda, and your on-premises servers.
 
 <a>
     <img src="images/codedeploybluegreen.png" alt="codedeploybluegreen" width="800" height="500">
@@ -217,7 +213,7 @@ As soon as it finish, we will see something like the image below. The process is
 To test that we are deployment the latest version, we only need to do the next changes.
 First, we need to wait until we finish to deploy everything. To know when it finish, we are only going to check the url and the swagger page. If you see the swagger page, we are good to proceed. Then, we need to do the next changes to our code and our pipeline.
 
-On our config.yml, change this variable
+On our config.yml, change this variable. This variable is going to help Terraform knows in what status we are and which of the two Target Group is the active one.
 ```
   aws-deploy-status:
     type: string
@@ -235,27 +231,13 @@ On our Dotnet api application, change the next line on the file ``WeatherForecas
         };
 ```
 
-As soon as you do those two changes, push into our pipeline and approved the steps. When the step blue-green-deployment finish, you will see the changes on our API.
-You check specifically the changes, you only need to go to the url ``http://odilo-front-end-892215146.eu-west-2.elb.amazonaws.com/WeatherForecast``
+As soon as you do those two changes, push it into our pipeline and approved the steps. When the step blue-green-deployment finish, you will see the changes on our API.
+You can check specifically the changes, you only need to go to the url ``http://urlelb/WeatherForecast``
 
 <!-- ROADMAP -->
 ## Roadmap
 
 See the [open issues](https://github.com/Pakoke/learn-terraform-circleci/issues) for a list of proposed features (and known issues).
-
-
-
-<!-- CONTRIBUTING -->
-## Contributing
-
-Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
 
 
 <!-- LICENSE -->
@@ -268,7 +250,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Francisco Javier Ruiz - [@twitter_handle](https://twitter.com/twitter_handle) - email
+Francisco Javier Ruiz - [@twitter_handle](https://twitter.com/twitter_handle) - jrdt1991@gmail.com
 
 Project Link: [https://github.com/Pakoke/learn-terraform-circleci](https://github.com/Pakoke/learn-terraform-circleci)
 
@@ -298,4 +280,4 @@ Project Link: [https://github.com/Pakoke/learn-terraform-circleci](https://githu
 [license-shield]: https://img.shields.io/github/license/Pakoke/repo.svg?style=for-the-badge
 [license-url]: https://github.com/Pakoke/repo/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/Pakoke
+[linkedin-url]: https://es.linkedin.com/in/fjaviruiztorres

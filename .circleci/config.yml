@@ -21,7 +21,7 @@ parameters:
     default: "eu-west-2"
   aws-deploy-status:
     type: string
-    default: "blue"    
+    default: "green"    
 
 orbs:
   orb-tools: circleci/orb-tools@10.0
