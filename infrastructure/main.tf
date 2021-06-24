@@ -2,6 +2,7 @@ data "aws_region" "current" {}
 
 data "aws_caller_identity" "current" {}
 
+# This module is going to built the minimun infrastructure to create a ECS cluster.
 module "ecs_cluster" {
   source = "./modules/ecs"
 

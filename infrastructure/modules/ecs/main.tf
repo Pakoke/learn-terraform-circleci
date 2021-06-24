@@ -1,9 +1,10 @@
 
-
+# Get the parameter created by AWS to get the latest ECS image
 data "aws_ssm_parameter" "ami_ecs_latest" {
   name = "/aws/service/ecs/optimized-ami/amazon-linux-2/recommended/image_id"
 }
 
+# Get the latest ami optimize for ECS
 data "aws_ami" "ecs_optimized" {
   filter {
     name   = "image-id"
@@ -25,7 +26,7 @@ data "aws_iam_policy_document" "ecs_agent" {
   }
 }
 
-# Define the role.
+# Define the role that the each EC2 instance is going to use
 resource "aws_iam_role" "ecs_agent" {
   name               = "ecs-agent"
   assume_role_policy = data.aws_iam_policy_document.ecs_agent.json
@@ -88,6 +89,7 @@ data "aws_iam_policy_document" "ecs_agent_permissions" {
   }
 }
 
+# Policy with the exact permissions that the agent need
 resource "aws_iam_policy" "ecs_agent_policy" {
   name   = "ecs_agent_permissions"
   path   = "/"
@@ -100,15 +102,18 @@ resource "aws_iam_role_policy_attachment" "ecs_agent" {
   policy_arn = aws_iam_policy.ecs_agent_policy.arn
 }
 
+# Instance profile used on our Autoscaling group
 resource "aws_iam_instance_profile" "ecs_agent" {
   name = "ecs-agent"
   role = aws_iam_role.ecs_agent.name
 }
 
+# ECS cluster
 resource "aws_ecs_cluster" "cluster" {
   name = var.ecs_cluster_name
 }
 
+# Autoscaling group where ECS is going to be installed
 resource "aws_autoscaling_group" "cluster" {
   name                = var.ecs_cluster_name
   vpc_zone_identifier = var.vpc_private_subnets
@@ -118,20 +123,9 @@ resource "aws_autoscaling_group" "cluster" {
     version = aws_launch_template.cluster.latest_version
   }
 
-  #target_group_arns = [aws_lb_target_group.tg_ecs.arn]
-
   desired_capacity = 2
   min_size         = 2
   max_size         = 3
-  #TODO
-  #Enable functionality from outside of the module
-  # instance_refresh {
-  #   strategy = "Rolling"
-  #   preferences {
-  #     min_healthy_percentage = 50
-  #   }
-  #   triggers = ["tag"]
-  # }
 
   tag {
     key                 = "Key"
@@ -146,15 +140,7 @@ resource "aws_autoscaling_group" "cluster" {
   }
 }
 
-# resource "aws_autoscaling_attachment" "asg_attachment_ecs" {
-#   autoscaling_group_name = aws_autoscaling_group.cluster.id
-#   alb_target_group_arn   = aws_lb_target_group.tg_ecs.arn
-# #   elb = aws_lb.front_end.id
-#   lifecycle {
-    
-#   }
-# }
-
+# Launch template associated to the ECS autoscaling group
 resource "aws_launch_template" "cluster" {
   name     = var.ecs_cluster_name
   image_id = data.aws_ami.ecs_optimized.id
@@ -179,17 +165,7 @@ resource "aws_launch_template" "cluster" {
       volume_type = "gp3"
     }
   }
-  #TODO
-  # Request and buy spot instances
-  # instance_market_options {
-  #   market_type = "spot"
-  # }
 
   vpc_security_group_ids = [aws_security_group.ecs.id]
-  #TODO
-  #If we specified another instance type, change the cpu credits
-  # credit_specification {
-  #   cpu_credits = "standards"
-  # }
 
 }

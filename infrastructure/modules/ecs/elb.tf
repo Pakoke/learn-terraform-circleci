@@ -1,3 +1,4 @@
+# Create the ELB to externally public the application
 resource "aws_lb" "front_end" {
   name               = var.elb_name
   internal           = false
@@ -10,6 +11,7 @@ resource "aws_lb" "front_end" {
 
 }
 
+# Default listener to test that it's working
 resource "aws_lb_listener" "front_end" {
     load_balancer_arn = aws_lb.front_end.arn
     port              = "80"
@@ -27,7 +29,7 @@ resource "aws_lb_listener" "front_end" {
   }
 }
 
-
+//Default listener rule to add an additional way to check that the ELB is healthy
 resource "aws_lb_listener_rule" "health_check" {
   listener_arn = aws_lb_listener.front_end.arn
 

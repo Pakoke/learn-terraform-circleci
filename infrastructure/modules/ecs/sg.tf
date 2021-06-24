@@ -1,4 +1,4 @@
-
+# Security group used for the ELB
 resource "aws_security_group" "elb" {
   name        = "frontend-elb"
   description = "Managed by Terraform"
@@ -37,6 +37,7 @@ resource "aws_security_group_rule" "elb_allow_all" {
   security_group_id = aws_security_group.elb.id
 }
 
+# Security group used for each EC2 instance on the ECS cluster
 resource "aws_security_group" "ecs" {
   name        = "app-ecs"
   description = "Managed by Terraform"

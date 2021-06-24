@@ -234,18 +234,10 @@ On our Dotnet api application, change the next line on the file ``WeatherForecas
 As soon as you do those two changes, push it into our pipeline and approved the steps. When the step blue-green-deployment finish, you will see the changes on our API.
 You can check specifically the changes, you only need to go to the url ``http://urlelb/WeatherForecast``
 
-<!-- ROADMAP -->
-## Roadmap
-
-See the [open issues](https://github.com/Pakoke/learn-terraform-circleci/issues) for a list of proposed features (and known issues).
-
-
 <!-- LICENSE -->
 ## License
 
 Distributed under the MIT License. See `LICENSE` for more information.
-
-
 
 <!-- CONTACT -->
 ## Contact
@@ -253,18 +245,6 @@ Distributed under the MIT License. See `LICENSE` for more information.
 Francisco Javier Ruiz - [@twitter_handle](https://twitter.com/twitter_handle) - jrdt1991@gmail.com
 
 Project Link: [https://github.com/Pakoke/learn-terraform-circleci](https://github.com/Pakoke/learn-terraform-circleci)
-
-
-
-<!-- ACKNOWLEDGEMENTS -->
-## Acknowledgements
-
-* []()
-* []()
-* []()
-
-
-
 
 
 <!-- MARKDOWN LINKS & IMAGES -->

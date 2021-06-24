@@ -1,3 +1,4 @@
+# Bucket to storage our deployment specs
 module "s3_bucket" {
   source = "terraform-aws-modules/s3-bucket/aws"
 
@@ -34,6 +35,7 @@ module "s3_bucket" {
   ]
 }
 
+# Upload the file at terraform apply
 resource "aws_s3_bucket_object" "dotnetapi_appspec" {
   bucket = module.s3_bucket.s3_bucket_id
   key    = "dotnetapi-app/appspec.json"
@@ -67,11 +69,13 @@ resource "aws_iam_role_policy_attachment" "AWSCodeDeployRole" {
   role       = aws_iam_role.codedeploy_role.name
 }
 
+# Create the AWS CodeDeploy app specific for dotnetapi
 resource "aws_codedeploy_app" "dotnetapi_app" {
   compute_platform = "ECS"
   name             = "dotnetapi-app"
 }
 
+# Create an specific deployment group to do a blue green deployment
 resource "aws_codedeploy_deployment_group" "dotnetapi_deploymentgroup" {
   app_name               = aws_codedeploy_app.dotnetapi_app.name
   deployment_config_name = "CodeDeployDefault.ECSAllAtOnce"

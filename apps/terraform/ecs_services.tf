@@ -1,4 +1,5 @@
 
+# Target group to route all the trafic
 resource "aws_lb_target_group" "tg_ecs_blue" {
   name     = "ecs-tg-blue"
   port     = 80
@@ -11,6 +12,7 @@ resource "aws_lb_target_group" "tg_ecs_blue" {
   }
 }
 
+# Target group to route all the trafic
 resource "aws_lb_target_group" "tg_ecs_green" {
   name     = "ecs-tg-green"
   port     = 80
@@ -23,10 +25,10 @@ resource "aws_lb_target_group" "tg_ecs_green" {
   }
 }
 
+# ELB rule to send all the trafic to the dotnet api container
 resource "aws_lb_listener_rule" "dotnetapi_rule" {
   listener_arn = data.aws_lb_listener.default80.arn
   priority     = 2
-
 
   action {
     type             = "forward"
@@ -39,6 +41,7 @@ resource "aws_lb_listener_rule" "dotnetapi_rule" {
   }
 }
 
+# ECS Service to deploy dotnet api
 resource "aws_ecs_service" "odilo_dotnetapi" {
   name            = "odilo-dotnetapi-service"
   cluster         = data.aws_ecs_cluster.ecs_cluster.id
@@ -46,16 +49,13 @@ resource "aws_ecs_service" "odilo_dotnetapi" {
   desired_count   = 2
   iam_role        = data.aws_iam_role.ecs_service_role.arn
   depends_on      = [aws_lb_target_group.tg_ecs_blue,aws_lb_target_group.tg_ecs_green,aws_ecs_task_definition.dotnetapi_task]
-  
+  # Ignore task definitio to not automatically assign the latest version.
+  # This is going to be done by CodeDeploy
   lifecycle {
     ignore_changes = [
       task_definition,
     ]
   }
-#   ordered_placement_strategy {
-#     type  = "binpack"
-#     field = "cpu"
-#   }
 
   load_balancer {
     target_group_arn = (var.blue_green == "blue") ? aws_lb_target_group.tg_ecs_blue.arn : aws_lb_target_group.tg_ecs_green.arn

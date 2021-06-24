@@ -15,8 +15,8 @@ namespace dotnetapi.Controllers
         {
             // Comment the next line and uncomment the next one below            
             // This will help to see how the blue green deployment install the latest code on our ecs cluster
-            //"Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-             "Nevado","Caluroso","Nublado","Tormentoso"
+            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+            // "Nevado","Caluroso","Nublado","Tormentoso"
         };
 
         private readonly ILogger<WeatherForecastController> _logger;
